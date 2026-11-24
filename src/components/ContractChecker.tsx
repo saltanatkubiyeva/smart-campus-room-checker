@@ -14,7 +14,11 @@ const BANNER = {
 } as const;
 
 function bannerKind(result: ContractResult): 'available' | 'unavailable' | 'invalid' {
-  if (result.reasonCode === 'INVALID_INPUT' || result.reasonCode === 'INVALID_DURATION') {
+  if (
+    result.reasonCode === 'INVALID_INPUT' ||
+    result.reasonCode === 'INVALID_DURATION' ||
+    result.reasonCode === 'PAST_START'
+  ) {
     return 'invalid';
   }
   return result.available ? 'available' : 'unavailable';

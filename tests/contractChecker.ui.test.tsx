@@ -91,6 +91,15 @@ describe('ContractChecker UI (P13)', () => {
     expect($('[data-testid="p13-result"]')).toBeNull();
   });
 
+  it('T6 through the form: 08:00 + 30 shows Invalid input / PAST_START', () => {
+    typeInto('#p13-start', '08:00');
+    typeInto('#p13-duration', '30');
+    click(button('Check'));
+    expect(resultText()).toContain('Invalid input');
+    expect(resultText()).toContain('PAST_START');
+    expect(integrityText()).toContain('bookings unchanged: yes');
+  });
+
   it('the integrity line reports unchanged bookings after several checks', () => {
     typeInto('#p13-start', '10:30');
     typeInto('#p13-duration', '60');
