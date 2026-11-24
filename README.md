@@ -25,7 +25,7 @@ npm run preview    # serve the production build
 ## Test
 
 ```bash
-npm test           # = vitest run — all 66 tests (unit + UI)
+npm test           # = vitest run — all 70 tests (unit + UI)
 npx vitest run tests/filterRooms.test.ts   # one file only
 npm run typecheck  # TypeScript check of src/
 ```
@@ -52,6 +52,14 @@ verdict itself is delegated to the unchanged `checkAvailability()` — the
 contract layer never re-implements a rule. The UI clears any previous result as
 soon as an input changes and shows a "Checks run: N — bookings unchanged:
 yes/no" line under the bookings table.
+
+## Practice 13 — links
+
+- Code-based live demo (tab "Contract check (P13)"): https://smart-campus-room-ch-ng8n.bolt.host
+- Low-code version (Appsmith, public): https://smart-campus.appsmith.com/app/smart-campus-room-checker-low-code/page1-6b05810f998af5f9e41e02fd
+- Low-code export, JS Object and notes: [`lowcode/`](lowcode/)
+- Parity test (Appsmith rules vs. `contract.ts`, 1,818 inputs): `tests/lowcodeParity.test.ts` — full suite now 70 tests
+- Report (PDF/DOCX) and screenshots: [`report/`](report/)
 
 ## Structure
 
