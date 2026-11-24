@@ -71,6 +71,16 @@ export function validateRequest(
       },
     };
   }
+  if (durationMinutes > 120) {
+    return {
+      ok: false,
+      result: {
+        available: false,
+        reasonCode: 'INVALID_DURATION',
+        message: 'Duration must be at most 120 minutes.',
+      },
+    };
+  }
   if (roomStatus !== 'Open' && roomStatus !== 'Blocked') {
     return {
       ok: false,
@@ -121,14 +131,6 @@ export function evaluateRequest(room: Room, req: unknown): ContractResult {
   const probe: Room = status === 'Blocked' ? { ...room, blocked: true } : room;
 
   const result = checkAvailability(probe, valid.start, valid.end, CURRENT_MINUTES);
-  if (result.reasonCode === 'TOO_LONG') {
-    // The contract separates an over-long duration (validation) from overlap.
-    return {
-      available: false,
-      reasonCode: 'INVALID_DURATION',
-      message: `Duration must be at most 120 minutes (requested ${valid.end - valid.start} min).`,
-    };
-  }
   return {
     available: result.available,
     reasonCode: CONTRACT_CODES[result.reasonCode],

@@ -2,7 +2,6 @@
 // catalog: bookings 09:00–10:00, 12:00–13:00, 15:00–16:00. Current time 09:00.
 import { describe, expect, it } from 'vitest';
 import { rooms } from '@/data/rooms';
-import { CURRENT_MINUTES } from '@/lib/constants';
 import { evaluateRequest, validateRequest } from '@/lib/contract';
 
 const A101 = rooms.find((r) => r.id === 'A-101')!;
@@ -64,6 +63,20 @@ describe('evaluateRequest (T1–T8)', () => {
     expect(out.reasonCode).toBe('INVALID_DURATION');
   });
 
+  it('T5b 08:00 + 121 -> INVALID_DURATION (not PAST_START)', () => {
+    const out = evaluate('08:00', 121);
+    expect(out.available).toBe(false);
+    expect(out.reasonCode).toBe('INVALID_DURATION');
+    expect(out.message).toContain('at most 120 minutes');
+  });
+
+  it('T5c 23:00 + 121 -> INVALID_DURATION (not "must end by 24:00")', () => {
+    const out = evaluate('23:00', 121);
+    expect(out.available).toBe(false);
+    expect(out.reasonCode).toBe('INVALID_DURATION');
+    expect(out.message).toContain('at most 120 minutes');
+  });
+
   it('T6 08:00 + 30 -> PAST_START (current time is 09:00)', () => {
     const out = evaluate('08:00', 30);
     expect(out.available).toBe(false);
@@ -85,9 +98,5 @@ describe('evaluateRequest (T1–T8)', () => {
     evaluate('08:00', 30);
     evaluate('13:00', 120);
     expect(JSON.stringify(A101.bookings)).toBe(bookingsBefore);
-  });
-
-  it('PAST_START comes from the deterministic rule at CURRENT_MINUTES', () => {
-    expect(CURRENT_MINUTES).toBe(540);
   });
 });

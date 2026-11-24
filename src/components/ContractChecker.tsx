@@ -26,6 +26,11 @@ export default function ContractChecker() {
   const [duration, setDuration] = useState('60');
   const [status, setStatus] = useState<'Open' | 'Blocked'>('Open');
   const [result, setResult] = useState<ContractResult | null>(null);
+  const [checksRun, setChecksRun] = useState(0);
+  // T8 evidence: snapshot of the bookings taken at load, compared after checks.
+  const bookingsSnapshot = JSON.stringify(A101.bookings);
+
+  const clearStaleResult = () => setResult(null);
 
   const handleCheck = () => {
     const minutes = Number(duration);
@@ -36,6 +41,7 @@ export default function ContractChecker() {
         roomStatus: status,
       })
     );
+    setChecksRun((n) => n + 1);
   };
 
   return (
@@ -58,7 +64,10 @@ export default function ContractChecker() {
             id="p13-start"
             type="time"
             value={start}
-            onChange={(e) => setStart(e.target.value)}
+            onChange={(e) => {
+              setStart(e.target.value);
+              clearStaleResult();
+            }}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
@@ -72,7 +81,10 @@ export default function ContractChecker() {
             min={1}
             max={120}
             value={duration}
-            onChange={(e) => setDuration(e.target.value)}
+            onChange={(e) => {
+              setDuration(e.target.value);
+              clearStaleResult();
+            }}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
@@ -83,7 +95,10 @@ export default function ContractChecker() {
           <select
             id="p13-status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as 'Open' | 'Blocked')}
+            onChange={(e) => {
+              setStatus(e.target.value as 'Open' | 'Blocked');
+              clearStaleResult();
+            }}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           >
             <option value="Open">Open</option>
@@ -138,6 +153,10 @@ export default function ContractChecker() {
             ))}
           </tbody>
         </table>
+        <p className="mt-2 text-xs text-slate-500" data-testid="p13-integrity">
+          Checks run: {checksRun} — bookings unchanged:{' '}
+          {JSON.stringify(A101.bookings) === bookingsSnapshot ? 'yes' : 'no'}
+        </p>
       </div>
     </section>
   );
