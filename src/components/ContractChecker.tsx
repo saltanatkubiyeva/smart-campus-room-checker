@@ -31,8 +31,9 @@ export default function ContractChecker() {
   const [status, setStatus] = useState<'Open' | 'Blocked'>('Open');
   const [result, setResult] = useState<ContractResult | null>(null);
   const [checksRun, setChecksRun] = useState(0);
-  // T8 evidence: snapshot of the bookings taken at load, compared after checks.
-  const bookingsSnapshot = JSON.stringify(A101.bookings);
+  // T8 evidence: captured once at load, not re-derived each render, so a later
+  // mutation of the catalog data would actually be detected.
+  const [bookingsSnapshot] = useState(() => JSON.stringify(A101.bookings));
 
   const clearStaleResult = () => setResult(null);
 

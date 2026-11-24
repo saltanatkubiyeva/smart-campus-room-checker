@@ -4,7 +4,7 @@
 import type { Room } from '@/data/rooms';
 import type { ReasonCode } from '@/lib/availability';
 import { checkAvailability } from '@/lib/availability';
-import { CURRENT_MINUTES, MINUTES_IN_DAY } from '@/lib/constants';
+import { CURRENT_MINUTES, MAX_BOOKING_MINUTES, MINUTES_IN_DAY } from '@/lib/constants';
 export type ContractReasonCode =
   | 'AVAILABLE'
   | 'OVERLAP'
@@ -71,13 +71,13 @@ export function validateRequest(
       },
     };
   }
-  if (durationMinutes > 120) {
+  if (durationMinutes > MAX_BOOKING_MINUTES) {
     return {
       ok: false,
       result: {
         available: false,
         reasonCode: 'INVALID_DURATION',
-        message: 'Duration must be at most 120 minutes.',
+        message: `Duration must be at most ${MAX_BOOKING_MINUTES} minutes.`,
       },
     };
   }
