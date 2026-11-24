@@ -1,4 +1,4 @@
-# Smart Campus Room Availability Checker — Assignment #04
+# Smart Campus Room Availability Checker
 
 React + TypeScript + Vite prototype. A student filters fictional campus rooms by
 attendees and equipment, selects a room and checks whether a time slot is available.
