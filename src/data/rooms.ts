@@ -97,3 +97,4 @@ for (const room of rooms) {
   for (const booking of room.bookings) Object.freeze(booking);
 }
 Object.freeze(EQUIPMENT_OPTIONS);
+Object.freeze(rooms);

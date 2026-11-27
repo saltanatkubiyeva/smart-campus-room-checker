@@ -3,7 +3,7 @@
 // assertions in tests/availability.test.ts.
 import { describe, expect, it } from 'vitest';
 import { checkAvailability } from '@/lib/availability';
-import { rooms, type Booking } from '@/data/rooms';
+import { rooms, type Booking, type Room } from '@/data/rooms';
 import { makeRoom, NOW } from './fixtures';
 
 const check = (start: number, end: number, room = makeRoom()) =>
@@ -73,11 +73,14 @@ describe('AC5 unchanged fixtures', () => {
     // Runtime immutability: `readonly` is erased in JS, so rooms.ts deep-freezes
     // the catalog at module load. Mutations must throw and change nothing.
     const a101 = rooms.find((r) => r.id === 'A-101')!;
+    expect(Object.isFrozen(rooms)).toBe(true);
     expect(Object.isFrozen(a101.bookings)).toBe(true);
     expect(Object.isFrozen(a101)).toBe(true);
     expect(Object.isFrozen(a101.bookings[0])).toBe(true);
 
     const before = JSON.stringify(rooms);
+    expect(() => (rooms as Room[]).push({ id: 'x', name: 'x', building: 'x', capacity: 1, equipment: [], blocked: false, bookings: [] })).toThrow(TypeError);
+    expect(rooms).toHaveLength(5);
     expect(() => (a101.bookings as Booking[]).push({ id: 'x', start: 0, end: 1, title: 'x', bookedBy: 'x' })).toThrow(TypeError);
     expect(a101.bookings).toHaveLength(3);
 
