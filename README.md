@@ -25,7 +25,7 @@ npm run preview    # serve the production build
 ## Test
 
 ```bash
-npm test           # = vitest run — all 70 tests (unit + UI)
+npm test           # = vitest run — all 73 tests (unit + UI)
 npx vitest run tests/filterRooms.test.ts   # one file only
 npm run typecheck  # TypeScript check of src/
 ```
@@ -58,14 +58,14 @@ yes/no" line under the bookings table.
 - Code-based live demo (tab "Contract check (P13)"): https://smart-campus-room-ch-ng8n.bolt.host
 - Low-code version (Appsmith, public): https://smart-campus.appsmith.com/app/smart-campus-room-checker-low-code/page1-6b05810f998af5f9e41e02fd
 - Low-code export, JS Object and notes: [`lowcode/`](lowcode/)
-- Parity test (Appsmith rules vs. `contract.ts`, 1,818 inputs): `tests/lowcodeParity.test.ts` — full suite now 70 tests
+- Parity test (Appsmith rules vs. `contract.ts`, 1,818 inputs): `tests/lowcodeParity.test.ts` — full suite now 73 tests
 - Report (PDF/DOCX) and screenshots: [`report/`](report/)
 
 ## Structure
 
 ```
 src/
-  data/rooms.ts              room catalog (5 fictional rooms) + types
+  data/rooms.ts              room catalog (5 fictional rooms, deep-frozen at load) + types
   lib/constants.ts           120-minute limit, fixed current time
   lib/time.ts                HH:MM parsing/formatting, 00:00 → 1440
   lib/availability.ts        AC1–AC5 and F3 (pure function)

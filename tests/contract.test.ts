@@ -13,7 +13,7 @@ const evaluate = (start: string, durationMinutes: number, roomStatus: 'Open' | '
 describe('validateRequest (validation only)', () => {
   it('T-val parses a valid request into minutes', () => {
     const out = validateRequest({ start: '10:30', durationMinutes: 60, roomStatus: 'Open' });
-    expect(out).toEqual({ ok: true, start: 630, end: 690 });
+    expect(out).toEqual({ ok: true, start: 630, end: 690, roomStatus: 'Open' });
   });
 
   it('T-val rejects malformed input and bookings ending after 24:00', () => {
@@ -49,6 +49,7 @@ describe('evaluateRequest (T1–T8)', () => {
     const out = evaluate('10:30', 60, 'Blocked');
     expect(out.available).toBe(false);
     expect(out.reasonCode).toBe('BLOCKED');
+    expect(out.message).toBe('This room is currently blocked and cannot be booked.');
   });
 
   it('T4 duration 0 -> INVALID_DURATION', () => {
@@ -87,6 +88,21 @@ describe('evaluateRequest (T1–T8)', () => {
     const out = evaluate('13:00', 120);
     expect(out.available).toBe(true);
     expect(out.reasonCode).toBe('AVAILABLE');
+  });
+
+  it('T-val reads roomStatus only once: a getter switching Blocked->Open cannot pass validation as Blocked but evaluate as Open', () => {
+    let reads = 0;
+    const tricky = {
+      start: '10:30',
+      durationMinutes: 60,
+      get roomStatus(): 'Open' | 'Blocked' {
+        reads += 1;
+        return reads === 1 ? 'Blocked' : 'Open';
+      },
+    };
+    const out = evaluateRequest(A101, tricky as unknown as Parameters<typeof evaluateRequest>[1]);
+    expect(out.reasonCode).toBe('BLOCKED');
+    expect(reads).toBe(1);
   });
 
   it('T8 bookings are unchanged after all checks', () => {

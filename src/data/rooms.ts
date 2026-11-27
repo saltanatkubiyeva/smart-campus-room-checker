@@ -87,3 +87,13 @@ export const rooms: readonly Room[] = [
     ],
   },
 ];
+
+// Runtime-immutability for the fixture data (AC5): `readonly` types are erased
+// at runtime, so the catalog is deep-frozen at module load instead.
+for (const room of rooms) {
+  Object.freeze(room);
+  Object.freeze(room.equipment);
+  Object.freeze(room.bookings);
+  for (const booking of room.bookings) Object.freeze(booking);
+}
+Object.freeze(EQUIPMENT_OPTIONS);

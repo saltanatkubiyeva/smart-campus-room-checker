@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CalendarCheck, DoorClosed } from 'lucide-react';
 import { rooms } from '@/data/rooms';
 import { CURRENT_MINUTES } from '@/lib/constants';
-import { evaluateRequest, type ContractResult } from '@/lib/contract';
+import { evaluateRequest, isValidationError, type ContractResult } from '@/lib/contract';
 import { minutesToTime } from '@/lib/time';
 
 const A101 = rooms.find((r) => r.id === 'A-101')!;
@@ -14,11 +14,7 @@ const BANNER = {
 } as const;
 
 function bannerKind(result: ContractResult): 'available' | 'unavailable' | 'invalid' {
-  if (
-    result.reasonCode === 'INVALID_INPUT' ||
-    result.reasonCode === 'INVALID_DURATION' ||
-    result.reasonCode === 'PAST_START'
-  ) {
+  if (isValidationError(result.reasonCode)) {
     return 'invalid';
   }
   return result.available ? 'available' : 'unavailable';

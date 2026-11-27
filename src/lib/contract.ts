@@ -34,7 +34,7 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
  */
 export function validateRequest(
   req: unknown
-): { ok: true; start: number; end: number } | { ok: false; result: ContractResult } {
+): { ok: true; start: number; end: number; roomStatus: 'Open' | 'Blocked' } | { ok: false; result: ContractResult } {
   if (typeof req !== 'object' || req === null) {
     return {
       ok: false,
@@ -106,7 +106,12 @@ export function validateRequest(
       },
     };
   }
-  return { ok: true, start: startMin, end: endMin };
+  return { ok: true, start: startMin, end: endMin, roomStatus };
+}
+
+/** Which contract codes are validation errors (rather than unavailability verdicts). */
+export function isValidationError(code: ContractReasonCode): boolean {
+  return code === 'INVALID_INPUT' || code === 'INVALID_DURATION' || code === 'PAST_START';
 }
 
 const CONTRACT_CODES: Record<ReasonCode, ContractReasonCode> = {
@@ -126,9 +131,7 @@ export function evaluateRequest(room: Room, req: unknown): ContractResult {
   const valid = validateRequest(req);
   if (!valid.ok) return valid.result;
 
-  const parsed = req as Record<string, unknown>;
-  const status = parsed.roomStatus as 'Open' | 'Blocked';
-  const probe: Room = status === 'Blocked' ? { ...room, blocked: true } : room;
+  const probe: Room = valid.roomStatus === 'Blocked' ? { ...room, blocked: true } : room;
 
   const result = checkAvailability(probe, valid.start, valid.end, CURRENT_MINUTES);
   return {

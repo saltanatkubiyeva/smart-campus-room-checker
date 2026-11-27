@@ -4,7 +4,7 @@
 // return the same reasonCode and availability for the same inputs.
 import { describe, expect, it } from 'vitest';
 import { rooms } from '@/data/rooms';
-import { evaluateRequest } from '@/lib/contract';
+import { evaluateRequest, isValidationError } from '@/lib/contract';
 // @ts-expect-error plain JS object exported from Appsmith (no type declarations)
 import Rules from '../lowcode/appsmith/Rules.js';
 
@@ -12,6 +12,7 @@ type LowCodeResult = { available: boolean; reasonCode: string; message: string }
 const lowCode = Rules as {
   evaluate: (start: string, duration: string, status: string) => LowCodeResult;
   runTests: () => { id: string; pass: boolean }[];
+  isValidationError: (code: string) => boolean;
   bookings: { start: string; end: string }[];
 };
 
@@ -31,6 +32,13 @@ describe('low-code (Appsmith) vs code-based parity', () => {
     expect(rows.every((r) => r.pass)).toBe(true);
   });
 
+  it('isValidationError agrees between the Appsmith object and contract.ts for all six codes', () => {
+    const codes = ['AVAILABLE', 'OVERLAP', 'BLOCKED', 'PAST_START', 'INVALID_DURATION', 'INVALID_INPUT'];
+    for (const code of codes) {
+      expect(Rules.isValidationError(code)).toBe(isValidationError(code as never));
+    }
+  });
+
   it('same reasonCode and availability for a grid of 1,500+ inputs', () => {
     const starts: string[] = [];
     for (let m = 0; m < 1440; m += 15) {
@@ -44,12 +52,13 @@ describe('low-code (Appsmith) vs code-based parity', () => {
         for (const status of ['Open', 'Blocked'] as const) {
           const code = evaluateRequest(A101, { start, durationMinutes: d, roomStatus: status });
           const low = lowCode.evaluate(start, String(d), status);
-          expect({ start, d, status, code: low.reasonCode, ok: low.available }).toEqual({
+          expect({ start, d, status, code: low.reasonCode, ok: low.available, msg: low.message }).toEqual({
             start,
             d,
             status,
             code: code.reasonCode,
             ok: code.available,
+            msg: code.message,
           });
           compared += 1;
         }

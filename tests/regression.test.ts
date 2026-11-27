@@ -3,7 +3,7 @@
 // assertions in tests/availability.test.ts.
 import { describe, expect, it } from 'vitest';
 import { checkAvailability } from '@/lib/availability';
-import { rooms } from '@/data/rooms';
+import { rooms, type Booking } from '@/data/rooms';
 import { makeRoom, NOW } from './fixtures';
 
 const check = (start: number, end: number, room = makeRoom()) =>
@@ -66,6 +66,24 @@ describe('AC5 unchanged fixtures', () => {
       checkAvailability(room, NOW + 1, NOW + 61, NOW);
       checkAvailability(room, 600, 660, NOW);
     }
+    expect(JSON.stringify(rooms)).toBe(before);
+  });
+
+  it('the catalog is deep-frozen: mutating a booking or the bookings array throws TypeError', () => {
+    // Runtime immutability: `readonly` is erased in JS, so rooms.ts deep-freezes
+    // the catalog at module load. Mutations must throw and change nothing.
+    const a101 = rooms.find((r) => r.id === 'A-101')!;
+    expect(Object.isFrozen(a101.bookings)).toBe(true);
+    expect(Object.isFrozen(a101)).toBe(true);
+    expect(Object.isFrozen(a101.bookings[0])).toBe(true);
+
+    const before = JSON.stringify(rooms);
+    expect(() => (a101.bookings as Booking[]).push({ id: 'x', start: 0, end: 1, title: 'x', bookedBy: 'x' })).toThrow(TypeError);
+    expect(a101.bookings).toHaveLength(3);
+
+    const originalStart = a101.bookings[0].start;
+    expect(() => ((a101.bookings[0] as Booking).start = 1)).toThrow(TypeError);
+    expect(a101.bookings[0].start).toBe(originalStart);
     expect(JSON.stringify(rooms)).toBe(before);
   });
 });
